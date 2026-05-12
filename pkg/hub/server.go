@@ -193,9 +193,6 @@ func (s *Server) updateCheckSkipReason() string {
 	if s.Config.DebugMode {
 		return "debug mode enabled"
 	}
-	if !strings.EqualFold(s.Config.AppEnv, "production") {
-		return "appEnv is not production"
-	}
 
 	return ""
 }
