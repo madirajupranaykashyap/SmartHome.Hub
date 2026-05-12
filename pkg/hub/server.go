@@ -46,7 +46,14 @@ type Server struct {
 	UpdateChecker *updater.Checker
 }
 
-const hubVersion = "1.0"
+const (
+	defaultUpdateOwner             = "Project-SmartHome"
+	defaultUpdateRepo              = "SmartHome.Hub"
+	defaultUpdateManifestAssetName = "update-manifest.json"
+	defaultUpdateRoot              = "."
+)
+
+var Version = "dev"
 
 func New(config Config) (*Server, error) {
 	config = withDefaults(config)
@@ -275,14 +282,20 @@ func withDefaults(config Config) Config {
 	if config.UpdateOwner == "" {
 		config.UpdateOwner = os.Getenv("UPDATE_GITHUB_OWNER")
 	}
+	if config.UpdateOwner == "" {
+		config.UpdateOwner = defaultUpdateOwner
+	}
 	if config.UpdateRepo == "" {
 		config.UpdateRepo = os.Getenv("UPDATE_GITHUB_REPO")
+	}
+	if config.UpdateRepo == "" {
+		config.UpdateRepo = defaultUpdateRepo
 	}
 	if config.UpdateManifestAssetName == "" {
 		config.UpdateManifestAssetName = os.Getenv("UPDATE_GITHUB_MANIFEST_ASSET_NAME")
 	}
 	if config.UpdateManifestAssetName == "" {
-		config.UpdateManifestAssetName = "update-manifest.json"
+		config.UpdateManifestAssetName = defaultUpdateManifestAssetName
 	}
 	if config.UpdateGitHubToken == "" {
 		config.UpdateGitHubToken = os.Getenv("UPDATE_GITHUB_TOKEN")
@@ -291,98 +304,23 @@ func withDefaults(config Config) Config {
 		config.UpdateRoot = os.Getenv("UPDATE_ROOT")
 	}
 	if config.UpdateRoot == "" {
-		config.UpdateRoot = "."
-	}
-
-	if config.AppEnv == "" {
-		config.AppEnv = os.Getenv("APP_ENV")
-	}
-	if !config.DebugMode {
-		config.DebugMode = envBool(os.Getenv("DEBUG"))
-	}
-
-	if config.UpdateConfigFile == "" {
-		config.UpdateConfigFile = os.Getenv("UPDATE_CONFIG_FILE")
-	}
-	if config.UpdateConfigFile == "" {
-		config.UpdateConfigFile = ".Manifest"
-	}
-	config = loadUpdateConfigFile(config)
-
-	if config.AppEnv == "" {
-		config.AppEnv = "production"
+		config.UpdateRoot = defaultUpdateRoot
 	}
 	if !config.EnableUpdateCheck {
 		config.EnableUpdateCheck = envBool(os.Getenv("ENABLE_UPDATE_CHECK"))
 	}
+	if !config.EnableUpdateCheck {
+		config.EnableUpdateCheck = true
+	}
 	if !config.UpdateAutoApply {
 		config.UpdateAutoApply = envBool(os.Getenv("UPDATE_AUTO_APPLY"))
 	}
+	if !config.UpdateAutoApply {
+		config.UpdateAutoApply = true
+	}
 
 	if config.CurrentVersion == "" {
-		config.CurrentVersion = hubVersion
-	}
-
-	return config
-}
-
-func loadUpdateConfigFile(config Config) Config {
-	data, err := os.ReadFile(config.UpdateConfigFile)
-	if err != nil {
-		return config
-	}
-
-	type fileConfig struct {
-		UpdateOwner             string `json:"updateOwner"`
-		UpdateRepo              string `json:"updateRepo"`
-		UpdateManifestAssetName string `json:"updateManifestAssetName"`
-		UpdateGitHubToken       string `json:"updateGitHubToken"`
-		UpdateRoot              string `json:"updateRoot"`
-		DatabasePath            string `json:"databasePath"`
-		AppEnv                  string `json:"appEnv"`
-		DebugMode               *bool  `json:"debugMode"`
-		EnableUpdateCheck       *bool  `json:"enableUpdateCheck"`
-		UpdateAutoApply         *bool  `json:"updateAutoApply"`
-		CurrentVersion          string `json:"currentVersion"`
-	}
-
-	var fileConf fileConfig
-	if err := json.Unmarshal(data, &fileConf); err != nil {
-		return config
-	}
-
-	if config.UpdateOwner == "" {
-		config.UpdateOwner = fileConf.UpdateOwner
-	}
-	if config.UpdateRepo == "" {
-		config.UpdateRepo = fileConf.UpdateRepo
-	}
-	if config.UpdateManifestAssetName == "" {
-		config.UpdateManifestAssetName = fileConf.UpdateManifestAssetName
-	}
-	if config.UpdateGitHubToken == "" {
-		config.UpdateGitHubToken = fileConf.UpdateGitHubToken
-	}
-	if config.UpdateRoot == "." && fileConf.UpdateRoot != "" {
-		config.UpdateRoot = fileConf.UpdateRoot
-	}
-	if config.DatabasePath == "" && fileConf.DatabasePath != "" {
-		config.DatabasePath = fileConf.DatabasePath
-	}
-	if config.AppEnv == "" && fileConf.AppEnv != "" {
-		config.AppEnv = fileConf.AppEnv
-	}
-	if config.CurrentVersion == "" {
-		config.CurrentVersion = fileConf.CurrentVersion
-	}
-	if fileConf.DebugMode != nil {
-		config.DebugMode = *fileConf.DebugMode
-	}
-	if fileConf.EnableUpdateCheck != nil {
-		config.EnableUpdateCheck = *fileConf.EnableUpdateCheck
-	}
-	if fileConf.UpdateAutoApply != nil {
-		config.UpdateAutoApply = *fileConf.UpdateAutoApply
+		config.CurrentVersion = Version
 	}
 
 	return config
