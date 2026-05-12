@@ -9,7 +9,12 @@ builds:
     goarch:
       - amd64
       - arm64
+archives:
+  - formats: [tar.gz]
 
+checksum:
+  name_template: checksums.txt
+  
 release:
   github:
     owner: madirajupranaykashyap
