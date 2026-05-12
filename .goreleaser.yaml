@@ -15,7 +15,7 @@ archives:
 checksum:
   name_template: checksums.txt
   
-release:
-  github:
-    owner: madirajupranaykashyap
-    name: SmartHome.Hub
+# release:
+#   github:
+#     owner: madirajupranaykashyap
+#     name: SmartHome.Hub
