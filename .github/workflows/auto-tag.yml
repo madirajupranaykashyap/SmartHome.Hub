@@ -1,0 +1,40 @@
+name: Auto Tag Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  auto-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from .Manifest
+        id: read_manifest
+        run: |
+          VERSION=$(jq -r '.currentVersion' .Manifest)
+          if [[ -z "$VERSION" || "$VERSION" == "null" ]]; then
+            echo 'Manifest version is empty'
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create tag if missing
+        env:
+          VERSION: ${{ steps.read_manifest.outputs.version }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists"
+            exit 0
+          fi
+          git tag -a "v${VERSION}" -m "Release v${VERSION}"
+          git push origin "v${VERSION}"
+        shell: bash
