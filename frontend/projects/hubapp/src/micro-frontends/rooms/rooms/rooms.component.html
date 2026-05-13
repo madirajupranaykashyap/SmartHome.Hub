@@ -1,0 +1,7 @@
+<ng-container *ngIf="userRooms$ | async as userRooms">
+    <ha-hub-room [UserRooms]="userRooms"></ha-hub-room>
+    <ng-container *ngIf="userRooms.state === 'hasError'">
+        hasError
+    </ng-container>
+</ng-container>
+
