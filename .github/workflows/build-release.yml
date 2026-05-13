@@ -44,10 +44,10 @@ jobs:
           cp -r frontend/dist/* backend/pkg/hub/frontend/
 
       - name: Build with goreleaser
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: latest
+          version: "~> v2"
           args: release --clean
           workdir: backend
         env:
