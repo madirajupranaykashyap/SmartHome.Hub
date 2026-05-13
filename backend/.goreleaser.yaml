@@ -19,8 +19,21 @@ builds:
       - CGO_ENABLED=0
     hooks:
       pre:
-        # Build and embed Angular frontend
-        - bash -c 'if [ -d "frontend" ]; then cd frontend && npm install --legacy-peer-deps && npm run build:hubapp && npm run build:shell && mkdir -p ../backend/pkg/hub/frontend && cp -r dist/* ../backend/pkg/hub/frontend/ || cp -r dist/*/dist/* ../backend/pkg/hub/frontend/ 2>/dev/null || true; fi'
+        - bash -c '
+          if [ -d "frontend" ]; then
+            cd frontend
+
+            echo "@ha:registry=https://pkgs.dev.azure.com/madirajupranaykashyap/HomeAutomation/_packaging/HomeAutomationFeed/npm/registry/" > .npmrc
+            echo "//pkgs.dev.azure.com/madirajupranaykashyap/HomeAutomation/_packaging/HomeAutomationFeed/npm/registry/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+
+            npm install --legacy-peer-deps
+            npm run build:hubapp
+            npm run build:shell
+
+            mkdir -p ../backend/pkg/hub/frontend
+            cp -r dist/* ../backend/pkg/hub/frontend/ || cp -r dist/*/dist/* ../backend/pkg/hub/frontend/ 2>/dev/null || true
+          fi
+          '
 
 archives:
   - id: archive
