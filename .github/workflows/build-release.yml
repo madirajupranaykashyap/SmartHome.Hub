@@ -33,7 +33,8 @@ jobs:
         run: |
           cd frontend
           npm install --legacy-peer-deps
-          npm run build
+          npm run build:hubapp
+          npm run build:shell
         env:
           NODE_AUTH_TOKEN: ${{ secrets.AZURE_ARTIFACTS_TOKEN }}
 

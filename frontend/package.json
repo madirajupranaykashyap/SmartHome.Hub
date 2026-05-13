@@ -6,7 +6,8 @@
     "start": "ulimit -n 4096 && WATCHPACK_POLLING=true CHOKIDAR_USEPOLLING=true ng serve shell",
     "start:shell": "ulimit -n 4096 && WATCHPACK_POLLING=true CHOKIDAR_USEPOLLING=true ng serve shell",
     "start:hubapp": "ulimit -n 4096 && WATCHPACK_POLLING=true CHOKIDAR_USEPOLLING=true ng serve hubapp",
-    "build": "ng build",
+    "build:hubapp": "ng build hubapp",
+    "build:shell": "ng build shell",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "generate:room:api": "openapi --input ./projects/room/auto/api.json --output ./projects/room/auto/client-gen --client fetch"
