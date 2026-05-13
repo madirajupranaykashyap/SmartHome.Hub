@@ -10,7 +10,7 @@ import (
 
 // StaticFS holds the embedded frontend assets
 //
-//go:embed frontend
+//go:embed frontend/*
 var StaticFS embed.FS
 
 func spaHandler() (http.Handler, error) {
