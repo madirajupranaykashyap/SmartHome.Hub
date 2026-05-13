@@ -1,3 +1,18 @@
+{
+  "updateOwner": "Project-SmartHome",
+  "updateRepo": "SmartHome.Hub",
+  "enableUpdateCheck": true,
+  "updateAutoApply": true,
+  "currentVersion": "1.0.0",
+  "updateManifestAssetName": "update-manifest.json",
+  "updateGitHubToken": "",
+  "updateRoot": ".",
+  "databasePath": "",
+  "appEnv": "production",
+  "debugMode": false
+}
+
+
 ## Library usage
 
 The server can be embedded from another Go program:

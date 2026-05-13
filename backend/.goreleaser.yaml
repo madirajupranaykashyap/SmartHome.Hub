@@ -1,0 +1,50 @@
+version: 2
+
+project_name: SmartHome.Hub
+
+builds:
+  - id: launcher
+    main: ./cmd/launcher
+    binary: smarthome-hub
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.author=madirajupranay
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=1
+    hooks:
+      pre:
+        # Build Angular frontend if needed
+        - bash -c 'if [ -d "../frontend" ]; then cd ../frontend && npm install && npm run build; fi'
+
+archives:
+  - id: archive
+    builds:
+      - launcher
+    formats:
+      - tar.gz
+      - zip
+    files:
+      - src: config.json
+        dst: config.json
+    wrap_in_directory: true
+
+checksum:
+  name_template: checksums.txt
+
+release:
+  prerelease: auto
+  draft: false
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
