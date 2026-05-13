@@ -12,6 +12,9 @@ backend/__debug_bin*
 frontend/dist/
 frontend/node_modules/
 
+# Goreleaser artifacts
+dist/
+
 # Environment
 .DS_Store
 *.log
