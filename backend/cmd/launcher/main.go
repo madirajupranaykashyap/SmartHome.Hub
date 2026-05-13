@@ -11,7 +11,6 @@ import (
 	"smarthome/hub/core/logger"
 	"smarthome/hub/internal/config"
 	hub "smarthome/hub/pkg/hub"
-	"smarthome/hub/pkg/updater"
 	"syscall"
 	"time"
 )
@@ -95,20 +94,10 @@ func checkAndApplyUpdates(ctx context.Context, cfg config.Config) error {
 
 	logger.Log.Info("Checking for updates from %s/%s", cfg.UpdateOwner, cfg.UpdateRepo)
 
-	source := updater.GitHubSource{
-		Owner:    cfg.UpdateOwner,
-		Repo:     cfg.UpdateRepo,
-		APIToken: cfg.UpdateGitHubToken,
-	}
-
-	release, err := source.Latest(ctx)
+	// Check for updates
+	release, err := hub.CheckForUpdates(ctx, cfg.UpdateOwner, cfg.UpdateRepo, cfg.UpdateGitHubToken)
 	if err != nil {
 		return fmt.Errorf("failed to check for updates: %w", err)
-	}
-
-	if release == nil {
-		logger.Log.Debug("No releases found")
-		return nil
 	}
 
 	logger.Log.Info("Latest version available: %s (current: %s)", release.Version, cfg.CurrentVersion)
@@ -124,23 +113,10 @@ func checkAndApplyUpdates(ctx context.Context, cfg config.Config) error {
 	}
 
 	// Apply updates
-	exePath, err := os.Executable()
+	logger.Log.Info("Applying updates...")
+	changes, err := hub.ApplyUpdates(ctx, release)
 	if err != nil {
-		return fmt.Errorf("failed to get executable path: %w", err)
-	}
-
-	rootDir := filepath.Dir(exePath)
-
-	client := updater.Client{
-		Root:    rootDir,
-		BaseURL: release.BaseURL,
-		GOOS:    release.GOOS,
-		GOARCH:  release.GOARCH,
-	}
-
-	changes, err := client.Plan(release.Manifest)
-	if err != nil {
-		return fmt.Errorf("failed to plan updates: %w", err)
+		return fmt.Errorf("failed to apply updates: %w", err)
 	}
 
 	if len(changes) == 0 {
@@ -148,19 +124,16 @@ func checkAndApplyUpdates(ctx context.Context, cfg config.Config) error {
 		return nil
 	}
 
-	logger.Log.Info("Applying %d updates", len(changes))
-	if err := client.Apply(ctx, release.Manifest); err != nil {
-		return fmt.Errorf("update failed: %w", err)
-	}
+	logger.Log.Info("Applied %d updates successfully. Please restart the application.", len(changes))
 
 	// Update config with new version
 	cfg.CurrentVersion = release.Version
-	configPath := filepath.Join(rootDir, "config.json")
+	configPath := filepath.Join(".", "config.json")
 	if err := config.SaveConfig(configPath, cfg); err != nil {
 		logger.Log.Warn("Failed to save updated config: %s", err.Error())
 	}
 
-	logger.Log.Info("Updates applied successfully. Please restart the application.")
+	// Return error to signal restart needed
 	return fmt.Errorf("application updated: restart required")
 }
 
