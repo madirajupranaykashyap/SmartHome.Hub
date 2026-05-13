@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -40,7 +42,7 @@ jobs:
 
       - name: Embed frontend in Go
         run: |
-          rm -rf backend/pkg/hub/frontend
+          rm -rf backend/pkg/hub/frontend/shell backend/pkg/hub/frontend/hubapp
           mkdir -p backend/pkg/hub/frontend
           cp -r frontend/dist/* backend/pkg/hub/frontend/
 
