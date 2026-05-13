@@ -11,7 +11,7 @@ import (
 
 var (
 	version = "dev"
-	author  = "madirajupranay"
+	author  = "Project-SmartHome"
 )
 
 // @title SmartHome Hub API

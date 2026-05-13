@@ -8,7 +8,7 @@ builds:
     main: ./cmd/launcher
     binary: smarthome-hub
     ldflags:
-      - -s -w -X main.version={{.Version}} -X main.author=madirajupranay
+      - -s -w -X main.version={{.Version}} -X main.author=Project-SmartHome
     goos:
       - linux
       - windows

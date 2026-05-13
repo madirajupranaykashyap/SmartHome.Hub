@@ -98,7 +98,7 @@ build-all: build-linux build-windows build-macos
 
 release:
 	@echo "$(BLUE)Creating release with goreleaser...$(NC)"
-	@goreleaser release --clean
+	@goreleaser release --clean --config ../.goreleaser.yaml
 	@echo "$(GREEN)✓ Release created$(NC)"
 
 dist: clean build-all

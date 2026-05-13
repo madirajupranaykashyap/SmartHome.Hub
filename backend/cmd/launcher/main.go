@@ -52,16 +52,17 @@ func main() {
 	// Create and start the hub server
 	logger.Log.Info("Starting SmartHome Hub server on %s", cfg.Addr)
 	server, err := hub.New(hub.Config{
-		Addr:              cfg.Addr,
-		DatabasePath:      cfg.DatabasePath,
-		UpdateOwner:       cfg.UpdateOwner,
-		UpdateRepo:        cfg.UpdateRepo,
-		UpdateGitHubToken: cfg.UpdateGitHubToken,
-		CurrentVersion:    currentVersion,
-		AppEnv:            cfg.AppEnv,
-		DebugMode:         cfg.DebugMode,
-		EnableUpdateCheck: cfg.EnableUpdateCheck,
-		UpdateAutoApply:   cfg.UpdateAutoApply,
+		Addr:                   cfg.Addr,
+		DatabasePath:           cfg.DatabasePath,
+		UpdateOwner:            cfg.UpdateOwner,
+		UpdateRepo:             cfg.UpdateRepo,
+		UpdateGitHubToken:      cfg.UpdateGitHubToken,
+		CurrentVersion:         currentVersion,
+		AppEnv:                 cfg.AppEnv,
+		DebugMode:              cfg.DebugMode,
+		EnableUpdateCheck:      cfg.EnableUpdateCheck,
+		UpdateAutoApply:        cfg.UpdateAutoApply,
+		SkipStartupUpdateCheck: true,
 	})
 	if err != nil {
 		logger.Log.Fatal("Failed to create server: %s", err.Error())

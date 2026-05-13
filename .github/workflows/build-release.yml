@@ -29,19 +29,20 @@ jobs:
           registry-url: 'https://pkgs.dev.azure.com/madirajupranaykashyap/HomeAutomation/_packaging/HomeAutomationFeed/npm/registry/'
           scope: '@ha'
 
-      # - name: Build Angular frontend
-      #   run: |
-      #     cd frontend
-      #     npm install --legacy-peer-deps
-      #     npm run build:hubapp
-      #     npm run build:shell
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.AZURE_ARTIFACTS_TOKEN }}
+      - name: Build Angular frontend
+        run: |
+          cd frontend
+          npm install --legacy-peer-deps
+          npm run build:hubapp
+          npm run build:shell
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.AZURE_ARTIFACTS_TOKEN }}
 
-      # - name: Embed frontend in Go
-      #   run: |
-      #     mkdir -p backend/pkg/hub/frontend
-      #     cp -r frontend/dist/* backend/pkg/hub/frontend/
+      - name: Embed frontend in Go
+        run: |
+          rm -rf backend/pkg/hub/frontend
+          mkdir -p backend/pkg/hub/frontend
+          cp -r frontend/dist/* backend/pkg/hub/frontend/
 
       - name: Get latest tag
         id: tag
@@ -95,7 +96,7 @@ jobs:
           do
             goos="${target%/*}"
             goarch="${target#*/}"
-            asset="SmartHome.Hub_${goos}_${goarch}"
+            asset="smarthome-hub_${goos}_${goarch}"
 
             if [ "$goos" = "windows" ]; then
               asset="${asset}.exe"
@@ -103,7 +104,7 @@ jobs:
 
             version="${{ steps.tag.outputs.new_tag }}"
             version="${version#v}"
-            GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 && go build \
+            GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build \
               -ldflags "-s -w -X main.version=${version} -X main.author=Project-SmartHome" \
               -o "../dist/update-assets/${asset}" \
               ./cmd/launcher
@@ -124,15 +125,15 @@ jobs:
             name="$(basename "$artifact")"
             sha256="$(sha256sum "$artifact" | awk '{print $1}')"
             size="$(stat -c%s "$artifact")"
-            target="${name#SmartHome.Hub_}"
+            target="${name#smarthome-hub_}"
             target="${target%.exe}"
             goos="${target%_*}"
             goarch="${target#*_}"
-            path="SmartHome.Hub"
+            path="smarthome-hub"
             mode=493
 
             if [ "$goos" = "windows" ]; then
-              path="SmartHome.Hub.exe"
+              path="smarthome-hub.exe"
               mode=420
             fi
 
@@ -168,4 +169,3 @@ jobs:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
           TAG: ${{ steps.tag.outputs.new_tag }}
         run: gh release upload "$TAG" dist/update-assets/* dist/update-manifest.json --clobber
-

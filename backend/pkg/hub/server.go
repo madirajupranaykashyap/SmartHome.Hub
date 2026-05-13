@@ -37,6 +37,7 @@ type Config struct {
 	DebugMode               bool
 	EnableUpdateCheck       bool
 	UpdateAutoApply         bool
+	SkipStartupUpdateCheck  bool
 }
 
 type Server struct {
@@ -195,6 +196,9 @@ func (s *Server) updateCheckSkipReason() string {
 	}
 	if !s.Config.EnableUpdateCheck {
 		return "disabled"
+	}
+	if s.Config.SkipStartupUpdateCheck {
+		return "already checked by launcher"
 	}
 	if s.Config.DebugMode {
 		return "debug mode enabled"
