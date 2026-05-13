@@ -55,8 +55,13 @@ func (s GitHubSource) Latest(ctx context.Context) (GitHubRelease, error) {
 			return GitHubRelease{}, err
 		}
 
+		version := manifest.Version
+		if version == "" {
+			version = strings.TrimPrefix(release.TagName, "v")
+		}
+
 		return GitHubRelease{
-			Version:     strings.TrimPrefix(release.TagName, "v"),
+			Version:     version,
 			Name:        release.Name,
 			HTMLURL:     release.HTMLURL,
 			ManifestURL: asset.BrowserDownloadURL,

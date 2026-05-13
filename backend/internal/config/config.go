@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"os"
-	"path/filepath"
 )
 
 // Config holds the application configuration
@@ -18,7 +17,6 @@ type Config struct {
 	EnableUpdateCheck bool   `json:"enableUpdateCheck"`
 	UpdateAutoApply   bool   `json:"updateAutoApply"`
 	UpdateGitHubToken string `json:"updateGitHubToken"`
-	CurrentVersion    string `json:"currentVersion"`
 
 	// Application settings
 	AppEnv     string `json:"appEnv"`
@@ -35,7 +33,6 @@ func DefaultConfig() Config {
 		UpdateRepo:        "SmartHome.Hub",
 		EnableUpdateCheck: true,
 		UpdateAutoApply:   true,
-		CurrentVersion:    "dev",
 		AppEnv:            "production",
 		DebugMode:         false,
 		FrontendFS:        true,
@@ -50,17 +47,8 @@ func LoadConfig(configPath string) (Config, error) {
 		return cfg, nil
 	}
 
-	// Create config directory if it doesn't exist
-	dir := filepath.Dir(configPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return cfg, err
-	}
-
-	// If file doesn't exist, create it with defaults
+	// If file doesn't exist, run entirely from defaults.
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		if err := SaveConfig(configPath, cfg); err != nil {
-			return cfg, err
-		}
 		return cfg, nil
 	}
 
@@ -75,14 +63,4 @@ func LoadConfig(configPath string) (Config, error) {
 	}
 
 	return cfg, nil
-}
-
-// SaveConfig saves configuration to a JSON file
-func SaveConfig(configPath string, cfg Config) error {
-	data, err := json.MarshalIndent(cfg, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(configPath, data, 0644)
 }

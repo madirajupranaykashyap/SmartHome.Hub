@@ -18,7 +18,7 @@ func TestGitHubSourceLatestDownloadsManifestAsset(t *testing.T) {
 			switch r.URL.Path {
 			case "/repos/acme/hub/releases/latest":
 				return jsonResponse(`{
-					"tag_name": "v1.2.3",
+					"tag_name": "v9.9.9",
 					"name": "Release 1.2.3",
 					"html_url": "https://github.com/acme/hub/releases/tag/v1.2.3",
 					"assets": [
@@ -65,6 +65,54 @@ func TestGitHubSourceLatestDownloadsManifestAsset(t *testing.T) {
 
 	if len(release.Manifest.Files) != 1 {
 		t.Fatalf("expected 1 manifest file, got %d", len(release.Manifest.Files))
+	}
+}
+
+func TestGitHubSourceLatestFallsBackToTagVersion(t *testing.T) {
+	client := &http.Client{
+		Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+			switch r.URL.Path {
+			case "/repos/acme/hub/releases/latest":
+				return jsonResponse(`{
+					"tag_name": "v1.2.3",
+					"assets": [
+						{
+							"name": "update-manifest.json",
+							"browser_download_url": "https://uploads.example.com/download/update-manifest.json"
+						}
+					]
+				}`), nil
+			case "/download/update-manifest.json":
+				return jsonResponse(`{
+					"files": [
+						{
+							"path": "hub",
+							"url": "hub",
+							"sha256": "` + sum("hub") + `"
+						}
+					]
+				}`), nil
+			default:
+				t.Fatalf("unexpected request path %q", r.URL.Path)
+				return nil, nil
+			}
+		}),
+	}
+
+	source := GitHubSource{
+		Owner:      "acme",
+		Repo:       "hub",
+		APIBaseURL: "https://api.example.com",
+		HTTPClient: client,
+	}
+
+	release, err := source.Latest(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if release.Version != "1.2.3" {
+		t.Fatalf("expected version 1.2.3, got %q", release.Version)
 	}
 }
 

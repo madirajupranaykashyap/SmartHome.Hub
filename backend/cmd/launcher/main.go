@@ -16,8 +16,9 @@ import (
 )
 
 var (
-	version = "dev"
-	author  = "madirajupranay"
+	version            = "dev"
+	author             = "Project-SmartHome"
+	errRestartRequired = errors.New("application updated: restart required")
 )
 
 func main() {
@@ -33,21 +34,34 @@ func main() {
 		logger.Log.Warn("Failed to load config: %s, using defaults", err.Error())
 		cfg = config.DefaultConfig()
 	}
+	currentVersion := runtimeVersion()
 
 	// Check for updates before starting server
 	logger.Log.Info("Checking for application updates...")
 	updateCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	err = checkAndApplyUpdates(updateCtx, cfg)
+	err = checkAndApplyUpdates(updateCtx, cfg, currentVersion)
 	cancel()
 	if err != nil {
+		if errors.Is(err, errRestartRequired) {
+			logger.Log.Info("Restart required after update. Exiting.")
+			return
+		}
 		logger.Log.Warn("Update check failed: %s", err.Error())
 	}
 
 	// Create and start the hub server
 	logger.Log.Info("Starting SmartHome Hub server on %s", cfg.Addr)
 	server, err := hub.New(hub.Config{
-		Addr:         cfg.Addr,
-		DatabasePath: cfg.DatabasePath,
+		Addr:              cfg.Addr,
+		DatabasePath:      cfg.DatabasePath,
+		UpdateOwner:       cfg.UpdateOwner,
+		UpdateRepo:        cfg.UpdateRepo,
+		UpdateGitHubToken: cfg.UpdateGitHubToken,
+		CurrentVersion:    currentVersion,
+		AppEnv:            cfg.AppEnv,
+		DebugMode:         cfg.DebugMode,
+		EnableUpdateCheck: cfg.EnableUpdateCheck,
+		UpdateAutoApply:   cfg.UpdateAutoApply,
 	})
 	if err != nil {
 		logger.Log.Fatal("Failed to create server: %s", err.Error())
@@ -81,7 +95,15 @@ func main() {
 	}
 }
 
-func checkAndApplyUpdates(ctx context.Context, cfg config.Config) error {
+func runtimeVersion() string {
+	if version == "" {
+		return "dev"
+	}
+
+	return version
+}
+
+func checkAndApplyUpdates(ctx context.Context, cfg config.Config, currentVersion string) error {
 	if !cfg.EnableUpdateCheck {
 		logger.Log.Debug("Update check disabled")
 		return nil
@@ -106,9 +128,9 @@ func checkAndApplyUpdates(ctx context.Context, cfg config.Config) error {
 		return nil
 	}
 
-	logger.Log.Info("Latest version available: %s (current: %s)", release.Version, cfg.CurrentVersion)
+	logger.Log.Info("Latest version available: %s (current: %s)", release.Version, currentVersion)
 
-	if release.Version == cfg.CurrentVersion {
+	if release.Version == currentVersion {
 		logger.Log.Debug("Already up to date")
 		return nil
 	}
@@ -132,15 +154,8 @@ func checkAndApplyUpdates(ctx context.Context, cfg config.Config) error {
 
 	logger.Log.Info("Applied %d updates successfully", len(changes))
 
-	// Update config with new version
-	cfg.CurrentVersion = release.Version
-	configPath := filepath.Join(".", "config.json")
-	if err := config.SaveConfig(configPath, cfg); err != nil {
-		logger.Log.Warn("Failed to save updated config: %s", err.Error())
-	}
-
 	logger.Log.Info("Updates applied successfully. Please restart the application.")
-	return fmt.Errorf("application updated: restart required")
+	return errRestartRequired
 }
 
 func printBanner() {

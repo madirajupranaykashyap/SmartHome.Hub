@@ -28,9 +28,10 @@
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}/backend/hub.go",
+      "cwd": "${workspaceFolder}/backend",
+      "program": "${workspaceFolder}/backend/cmd/launcher/main.go",
       "envFile": "${workspaceFolder}/.env",
-      "buildFlags": "-ldflags=\"-X smarthome/hub/internal/meta.Version=$(git describe --tags --always)\""
+      // "buildFlags": "-ldflags=\"-X smarthome/hub/internal/meta.Version=$(git describe --tags --always)\""
       // "buildFlags": "-ldflags=\"-X smarthome/hub/internal/meta.Version=0.0.6\""
     }
   ]
