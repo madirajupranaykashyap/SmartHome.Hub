@@ -9,6 +9,7 @@ import (
 )
 
 // StaticFS holds the embedded frontend assets
+//
 //go:embed frontend
 var StaticFS embed.FS
 

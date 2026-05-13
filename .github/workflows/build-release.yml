@@ -105,7 +105,7 @@ jobs:
             GOOS="$goos" GOARCH="$goarch" CGO_ENABLED=0 go build \
               -ldflags "-s -w -X main.version=${version} -X main.author=madirajupranay" \
               -o "dist/update-assets/${asset}" .
-#           done
+          done
 
       - name: Create update manifest
         env:
