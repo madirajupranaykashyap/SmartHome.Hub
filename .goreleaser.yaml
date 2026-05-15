@@ -25,17 +25,22 @@ builds:
 
       # Generates a .pkg installer using macOS tools during the build stage
       post:
-        - bash -c '
-            if [ "{{.Os}}" = "darwin" ]; then
-              mkdir -p dist/pkg_root/usr/local/bin
-              cp "{{.Path}}" dist/pkg_root/usr/local/bin/
-              pkgbuild --root dist/pkg_root \
-                       --identifier "com.project-smarthome.hub" \
-                       --version "{{.Version}}" \
-                       --install-location "/" \
-                       "dist/SmartHomeHub-{{.Arch}}.pkg"
-              rm -rf dist/pkg_root
-            fi'
+        - |
+          if [ "{{ .Os }}" = "darwin" ]; then
+            mkdir -p dist/pkg_root/usr/local/bin
+
+            cp "{{ .Path }}" \
+              dist/pkg_root/usr/local/bin/smarthome-hub
+
+            pkgbuild \
+              --root dist/pkg_root \
+              --identifier com.project-smarthome.hub \
+              --version "{{ .Version }}" \
+              --install-location "/" \
+              "dist/SmartHomeHub-{{ .Arch }}.pkg"
+
+            rm -rf dist/pkg_root
+          fi
 universal_binaries:
   - id: launcher                # Connects to your build block ID above
     ids:
