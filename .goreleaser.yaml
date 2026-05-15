@@ -21,7 +21,7 @@ before:
         cp -R frontend/dist/shell backend/pkg/hub/frontend/ &&
         cp -R frontend/dist/hubapp backend/pkg/hub/frontend/
       '
-      
+
 builds:
   - id: launcher
     dir: ./backend
@@ -72,13 +72,7 @@ nfpms:
       - rpm
       - apk
     bindir: /usr/local/bin
-    builds:
-      - launcher
     contents:
-      # Main binary
-      - src: ./dist/{{ .ProjectName }}_Linux_x86_64/smarthome-hub
-        dst: /usr/local/bin/smarthome-hub
-
       # Frontend assets
       - src: ./frontend/dist
         dst: /usr/local/share/smarthome/frontend
