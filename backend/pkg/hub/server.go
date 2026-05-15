@@ -11,6 +11,7 @@ import (
 	"smarthome/hub/core/middleware"
 	"smarthome/hub/internal/auth"
 	"smarthome/hub/internal/database"
+	"smarthome/hub/internal/rooms"
 	"smarthome/hub/pkg/updater"
 	"strings"
 	"time"
@@ -101,6 +102,9 @@ func NewRouter(db *sql.DB, config Config, checker *updater.Checker) http.Handler
 	authRepo := auth.NewAuthRepository(db)
 	authService := auth.NewAuthService(authRepo)
 	authHandler := auth.NewAuthHandler(authService)
+	roomsRepo := rooms.NewRepository(db)
+	roomsService := rooms.NewService(roomsRepo)
+	roomsHandler := rooms.NewHandler(roomsService)
 
 	router := chi.NewRouter()
 
@@ -128,6 +132,7 @@ func NewRouter(db *sql.DB, config Config, checker *updater.Checker) http.Handler
 	}))
 
 	authHandler.RegisterRoutes(router)
+	roomsHandler.RegisterRoutes(router)
 
 	router.Get(
 		"/swagger/*",

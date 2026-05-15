@@ -1,5 +1,6 @@
 __debug*
 SmartHome.Hub
+smarthome-hub
 .env
 
 # Build artifacts

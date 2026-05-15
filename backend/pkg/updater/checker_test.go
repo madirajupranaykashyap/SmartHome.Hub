@@ -84,8 +84,7 @@ func TestCheckerApplyDownloadsManifestFiles(t *testing.T) {
 	}
 
 	checker := Checker{
-		Client:         Client{Root: root},
-		CurrentVersion: "1.0.0",
+		Client: Client{Root: root},
 	}
 
 	manifest := Manifest{

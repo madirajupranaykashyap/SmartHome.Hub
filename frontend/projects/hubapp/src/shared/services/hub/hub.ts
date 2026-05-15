@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { HubUserRoom } from '@ha/components-library/models';
+import { Room, UserRoom } from '@ha/components-library/models';
 import { DataState } from '@ha/components-library/shared';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
@@ -19,8 +19,10 @@ export class HubService {
   baseUrl = 'http://localhost:8080';
 
   private http = inject(HttpClient);
-  _rooms$ = new BehaviorSubject<DataState<HubUserRoom[]>>({ state: 'waitingForData' });
+  _rooms$ = new BehaviorSubject<DataState<UserRoom[]>>({ state: 'waitingForData' });
   readonly rooms$ = this._rooms$.asObservable();
+  _allRooms$ = new BehaviorSubject<DataState<Room[]>>({ state: 'waitingForData' });
+  readonly allRooms$ = this._allRooms$.asObservable();
 
   // login
 
@@ -44,10 +46,10 @@ export class HubService {
     );
   }
 
-  getAllRooms(): Observable<HubUserRoom[]> {
+  getAllRooms(): Observable<UserRoom[]> {
     const url = this.baseUrl + `/api/rooms`;
     this._rooms$.next({ state: 'waitingForData' });
-    return this.http.get<HubUserRoom[]>(url).pipe(
+    return this.http.get<UserRoom[]>(url).pipe(
       tap({
         next: (data) => {
           this._rooms$.next({
@@ -61,6 +63,45 @@ export class HubService {
             error,
           });
         }
+      })
+    );
+  }
+
+  getRoomCatalog(): Observable<Room[]> {
+    const url = this.baseUrl + `/api/rooms/catalog`;
+    this._allRooms$.next({ state: 'waitingForData' });
+    return this.http.get<Room[]>(url).pipe(
+      tap({
+        next: (data) => {
+          this._allRooms$.next({
+            state: 'hasData',
+            data,
+          });
+        },
+        error: (error) => {
+          this._allRooms$.next({
+            state: 'hasError',
+            error,
+          });
+        }
+      })
+    );
+  }
+
+  createUserRoom(roomGuid: string): Observable<UserRoom> {
+    const url = this.baseUrl + `/api/rooms`;
+    return this.http.post<UserRoom>(url, { room_guid: roomGuid }).pipe(
+      tap(() => {
+        this.getAllRooms().subscribe();
+      })
+    );
+  }
+
+  deleteUserRoom(id: string): Observable<void> {
+    const url = this.baseUrl + `/api/rooms/${id}`;
+    return this.http.delete<void>(url).pipe(
+      tap(() => {
+        this.getAllRooms().subscribe();
       })
     );
   }
