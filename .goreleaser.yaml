@@ -23,24 +23,6 @@ builds:
         # Build and embed Angular frontend
         - bash -c 'if [ -d "../frontend" ]; then cd ../frontend && npm install --legacy-peer-deps && npm run build:hubapp && npm run build:shell && mkdir -p ../backend/pkg/hub/frontend && cp -r dist/* ../backend/pkg/hub/frontend/ || cp -r dist/*/dist/* ../backend/pkg/hub/frontend/ 2>/dev/null || true; fi'
 
-      # Generates a .pkg installer using macOS tools during the build stage
-      post:
-        - |
-          if [ "{{ .Os }}" = "darwin" ]; then
-            mkdir -p dist/pkg_root/usr/local/bin
-
-            cp "{{ .Path }}" \
-              dist/pkg_root/usr/local/bin/smarthome-hub
-
-            pkgbuild \
-              --root dist/pkg_root \
-              --identifier com.project-smarthome.hub \
-              --version "{{ .Version }}" \
-              --install-location "/" \
-              "dist/SmartHomeHub-{{ .Arch }}.pkg"
-
-            rm -rf dist/pkg_root
-          fi
 universal_binaries:
   - id: launcher                # Connects to your build block ID above
     ids:

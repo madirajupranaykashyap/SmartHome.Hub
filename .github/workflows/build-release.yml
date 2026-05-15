@@ -216,6 +216,21 @@ jobs:
           export VERSION
           bash scripts/package-macos.sh
 
+      - name: Create macOS pkg
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p dist/pkg_root/usr/local/bin
+      
+          cp dist/smarthome-hub_darwin_all/smarthome-hub \
+             dist/pkg_root/usr/local/bin/hub
+      
+          pkgbuild \
+            --root dist/pkg_root \
+            --identifier com.project-smarthome.hub \
+            --version ${GITHUB_REF_NAME#v} \
+            --install-location "/" \
+            dist/SmartHomeHub.pkg      
+        
       - name: Upload macOS package to release
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
