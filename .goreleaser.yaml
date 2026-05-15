@@ -4,8 +4,8 @@ project_name: SmartHome.Hub
 
 before:
   hooks:
-    # Build Angular frontend
-    - bash -c '
+    - |
+      bash -c '
         if [ -d "./frontend" ]; then
           cd ./frontend &&
           npm install --legacy-peer-deps &&
@@ -14,13 +14,14 @@ before:
         fi
       '
 
-    # Copy frontend into Go embed directory
-    - bash -c '
+    - |
+      bash -c '
         rm -rf backend/pkg/hub/frontend &&
         mkdir -p backend/pkg/hub/frontend &&
         cp -R frontend/dist/shell backend/pkg/hub/frontend/ &&
-        cp -R frontend/dist/hubapp backend/pkg/hub/frontend/'
-
+        cp -R frontend/dist/hubapp backend/pkg/hub/frontend/
+      '
+      
 builds:
   - id: launcher
     dir: ./backend
